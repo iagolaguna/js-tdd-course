@@ -1,35 +1,144 @@
-/* eslint-disable */
-import { expect } from 'chai';
-import FizzBuzz from '../src/main'
-/*
- Desafio FizzBuzz
- Escreva uma lib que receba um número e:
- Se o número for divisível por 3, no lugar do número escreva 'Fizz' - X
-Se o número for divisível por 5, no lugar do número escreva 'Buzz' - X
-Se o número for divisível por 3 e 5, no lugar do número escreva 'FizzBuzz' - X
-Se não for múltiplo de nada, retorna o número
-  */
-describe('FizzBuzz', () => {
-  it('should return `Fizz` when multiple of 3', () => {
-    expect(FizzBuzz(3)).to.be.equal('Fizz');
-    expect(FizzBuzz(6)).to.be.equal('Fizz');
+/* eslint-disable*/
+import chai, { expect } from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+chai.use(sinonChai);
+
+
+global.fetch = require('node-fetch');
+
+import { search, searchAlbums, searchArtists, searchTracks, searchPlaylists } from '../src/main';
+
+describe('Spotify Wrapper', () => {
+  let stubedFetch;
+
+  beforeEach(() => {
+    stubedFetch = sinon.stub(global, 'fetch');
+    stubedFetch.resolves({ json: () => ({}) });
   });
 
-  it('should return `Buzz` when multiple of 5', () => {
-    expect(FizzBuzz(5)).to.be.equal('Buzz');
-    expect(FizzBuzz(10)).to.be.equal('Buzz');
+  afterEach(() => {
+    stubedFetch.restore();
   });
 
-  it('should return `FizzBuzz` when multiple of 3 and 5', () => {
-    expect(FizzBuzz(15)).to.be.equal('FizzBuzz');
+
+  describe('smoke tests', () => {
+    it('should exist the search method', () => {
+      expect(search).to.exist;
+    })
+
+    it('should exist the searchAlbums method', () => {
+      expect(searchAlbums).to.exist;
+    });
+
+    it('should exist the searchArtists method', () => {
+      expect(searchArtists).to.exist;
+    });
+
+    it('should exist the searchTracks method', () => {
+      expect(searchTracks).to.exist;
+    });
+
+    it('should exist the searchPlaylists method', () => {
+      expect(searchPlaylists).to.exist;
+    });
   });
 
-  it('should return the number when non-multiple', () => {
-    expect(FizzBuzz(7)).to.be.equal(7);
+  describe('Generic search', () => {
+
+    it('should call fetch function', () => {
+      const artists = search();
+      expect(stubedFetch).to.have.been.calledOnce;
+    });
+
+    it('should receive the correct url to fetch', () => {
+      context('passing one type', () => {
+        const artists = search('Incubus', 'artist');
+        expect(stubedFetch).to.have.been
+          .calledWith('https://api.spotify.com/v1/search?q=Incubus&type=artist')
+
+        const albums = search('Incubus', 'album');
+        expect(stubedFetch)
+          .to.have.been
+          .calledWith('https://api.spotify.com/v1/search?q=Incubus&type=album')
+      });
+
+      context('passing more than one type', () => {
+        const artistsAndAlbums = search('Incubus', ['artist', 'album']);
+        expect(stubedFetch)
+          .to.have.been
+          .calledWith('https://api.spotify.com/v1/search?q=Incubus&type=artist,album')
+      });
+    });
+
+    it('should return the JSON Data from the Promise', () => {
+      const artists = search('Incubus', 'artist');
+
+      artists.then((data) => {
+        expect(data).to.be.eql({})
+      })
+    })
+
   });
 
-  it('should return 0 when 0', () => {
-    expect(FizzBuzz(0)).to.be.equal(0);
+  describe('searchArtists', () => {
+    it('should call fetch function', () => {
+      const artists = searchArtists('Incubus');
+      expect(stubedFetch).to.been.calledOnce;
+    });
+
+    it('should call fetch with the correct url',() => {
+      const artists = searchArtists('Incubus');
+      expect(stubedFetch).to.have.been.calledWith('https://api.spotify.com/v1/search?q=Incubus&type=artist')
+
+      const artists2 = searchArtists('Muse');
+      expect(stubedFetch).to.have.been.calledWith('https://api.spotify.com/v1/search?q=Muse&type=artist')
+    });
   });
 
-});
+  describe('searchAlbums', () => {
+    it('should call fetch function', () => {
+      const albums = searchAlbums('Incubus');
+      expect(stubedFetch).to.been.calledOnce;
+    });
+
+    it('should call fetch with the correct url',() => {
+      const albums = searchAlbums('Incubus');
+      expect(stubedFetch).to.have.been.calledWith('https://api.spotify.com/v1/search?q=Incubus&type=album')
+
+      const albums2 = searchAlbums('Muse');
+      expect(stubedFetch).to.have.been.calledWith('https://api.spotify.com/v1/search?q=Muse&type=album')
+    });
+  });
+
+  describe('searchTracks', () => {
+    it('should call fetch function', () => {
+      const tracks = searchTracks('Incubus');
+      expect(stubedFetch).to.been.calledOnce;
+    });
+
+    it('should call fetch with the correct url',() => {
+      const tracks = searchTracks('Incubus');
+      expect(stubedFetch).to.have.been.calledWith('https://api.spotify.com/v1/search?q=Incubus&type=track')
+
+      const tracks2 = searchTracks('Muse');
+      expect(stubedFetch).to.have.been.calledWith('https://api.spotify.com/v1/search?q=Muse&type=track')
+    });
+  });
+
+  describe('searchPlaylists', () => {
+    it('should call fetch function', () => {
+      const playlists = searchPlaylists('Incubus');
+      expect(stubedFetch).to.been.calledOnce;
+    });
+
+    it('should call fetch with the correct url',() => {
+      const playlists = searchPlaylists('Incubus');
+      expect(stubedFetch).to.have.been.calledWith('https://api.spotify.com/v1/search?q=Incubus&type=playlist')
+
+      const playlists2 = searchPlaylists('Muse');
+      expect(stubedFetch).to.have.been.calledWith('https://api.spotify.com/v1/search?q=Muse&type=playlist')
+    });
+  });
+
+})

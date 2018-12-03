@@ -1,5 +1,5 @@
 {
-  "name": "js-tdd-course",
+  "name": "spotify-wrapper",
   "version": "1.0.0",
   "description": "Nossa biblioteca do curso de JS com TDD na prática.",
   "main": "index.js",
@@ -47,7 +47,10 @@
     "eslint-plugin-import": "^2.14.0",
     "husky": "^0.11.9",
     "mocha": "^3.2.0",
+    "node-fetch": "^2.3.0",
     "nyc": "^10.3.2",
-    "rimraf": "^2.6.1"
+    "rimraf": "^2.6.1",
+    "sinon": "^7.1.1",
+    "sinon-chai": "^3.3.0"
   }
 }
